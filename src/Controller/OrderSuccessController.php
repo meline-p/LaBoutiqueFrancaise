@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Order;
 use App\Classe\Cart;
+use App\Classe\Mail;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
@@ -31,10 +32,15 @@ class OrderSuccessController extends AbstractController
         if (!$order->isIsPaid()) {
         //Vider la session 'cart'
         $cart->remove();
+
         //modifier le statut isPaid de notre commande en mettant 1
         $order->setIsPaid(1);
         $this->entityManager->flush();
+
         //envoyer un email à notre client pour lui confirmer sa commande
+        $mail = new Mail();
+        $content = "Bonjour ".$order->getUser()->getFirstname()."<br/>Merci pour votre commande. Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book.";
+        $mail->send($order->getUser()->getEmail(), $order->getUser()->getFirstname(), 'Votre commande La Boutique Française est bien validée.', $content);
         }
 
         return $this->render('order_success/index.html.twig', [
